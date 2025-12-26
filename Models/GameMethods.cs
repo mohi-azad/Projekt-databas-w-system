@@ -1,4 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.VisualBasic;
 using Projekt_databas_och_w_system.Models.Details;
 
 namespace Projekt_databas_och_w_system.Models
@@ -45,18 +47,20 @@ namespace Projekt_databas_och_w_system.Models
                     SELECT CurrentTurnPlayerId, IsFinished, WinnerPlayerId, Player2Id
                     FROM Games WHERE GameId=@id";
 
-            using SqlCommand cmd = new SqlCommand(gameSql, sqlConnection);
-            cmd.Parameters.AddWithValue("@id", gameId);
-
-            using SqlDataReader reader = cmd.ExecuteReader();
-            if (reader.Read())
+            using (SqlCommand cmd = new SqlCommand(gameSql, sqlConnection))
             {
-                currentTurn = reader.GetInt32(0);
-                isFinished = reader.GetBoolean(1);
-                if (!reader.IsDBNull(2)) winnerId = reader.GetInt32(2);
-                if (!reader.IsDBNull(3)) player2Id = reader.GetInt32(3);
-            }
+                cmd.Parameters.AddWithValue("@id", gameId);
 
+                using SqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    currentTurn = reader.GetInt32(0);
+                    isFinished = reader.GetBoolean(1);
+                    if (!reader.IsDBNull(2)) winnerId = reader.GetInt32(2);
+                    if (!reader.IsDBNull(3)) player2Id = reader.GetInt32(3);
+                }
+
+            }            
             // Hämta boxarna via BoxMethods
             List<BoxDetails> boxes = _boxMethods.GetBoxes(sqlConnection, gameId);
             return (boxes, currentTurn, isFinished, winnerId, player2Id);
@@ -169,14 +173,38 @@ namespace Projekt_databas_och_w_system.Models
 
 
         // metod för spelarens drag i spel
-        public void PlayerOpenBox(int gameId, int playerId, int boxId)
+        public BoxResult PlayerOpenBox(int gameId, int playerId, int boxId)
         {
+            
             using SqlConnection sqlConnection = new(ConnectionString);
             sqlConnection.Open();
+            // kontrollera vems tur är det i spelet
+            string turnchecksql = @"SELECT CurrentTurnPlayerId, IsFinished, player2Id FROM Games WHERE GameId= @g";
+
+            using(SqlCommand checkcmd= new SqlCommand(turnchecksql, sqlConnection))
+            {
+                checkcmd.Parameters.AddWithValue("@g", gameId);
+                using var reader= checkcmd.ExecuteReader();
+                if (!reader.Read())
+                    throw new Exception("Game not found");
+
+                bool isFinished= reader.GetBoolean(1);
+                int currentTurnPlayerId= reader.GetInt32(0);
+
+                if (isFinished)
+                    throw new Exception("Game is already finished");
+
+                if (currentTurnPlayerId != playerId)
+                    throw new Exception("It is not your turn!");
+
+                if (reader.IsDBNull(2))
+                {
+                    throw new Exception("Waiting for second player!");
+                }
+            }
 
             // öppna box
             BoxDetails box = _boxMethods.OpenBox(sqlConnection, boxId);
-
             // göra ett drag
             _moveMethods.AddMove(sqlConnection, gameId, playerId, boxId);
 
@@ -207,27 +235,37 @@ namespace Projekt_databas_och_w_system.Models
             // hantera vad som finns i en box
             if (box.IsGold)
             {
-                string sql = "UPDATE Games SET WinnerPlayerId=@p, IsFinished=1 WHERE GameId=@g";
-                using SqlCommand cmd = new SqlCommand(sql, sqlConnection);
-                cmd.Parameters.AddWithValue("@p", playerId);
-                cmd.Parameters.AddWithValue("@g", gameId);
-                cmd.ExecuteNonQuery();
+                string sqlgold = "UPDATE Games SET WinnerPlayerId=@p, IsFinished=1 WHERE GameId=@g";
+                using SqlCommand goldcmd = new SqlCommand(sqlgold, sqlConnection);
+                goldcmd.Parameters.AddWithValue("@p", playerId);
+                goldcmd.Parameters.AddWithValue("@g", gameId);
+                goldcmd.ExecuteNonQuery();
+                return BoxResult.Gold;
             }
-            else if(extraTurns > 0)
+            if (box.IsGold)
             {
-                string sql = "UPDATE Games SET ExtraTurns = ExtraTurns - 1 WHERE GameId=@g";
-                using SqlCommand cmd = new SqlCommand(sql, sqlConnection);
-                cmd.Parameters.AddWithValue("@g", gameId);
-                cmd.ExecuteNonQuery();
+                string sqlbomb = "UPDATE Games SET CurrentTurnPlayerId=@next WHERE GameId=@g";
+                using SqlCommand bombcmd = new SqlCommand(sqlbomb, sqlConnection);
+                bombcmd.Parameters.AddWithValue("@next", nextTurn);
+                bombcmd.Parameters.AddWithValue("@g", gameId);
+                bombcmd.ExecuteNonQuery();
+                return BoxResult.Bomb;
             }
-            else
+            if(extraTurns > 0)
             {
-                string sql = "UPDATE Games SET CurrentTurnPlayerId=@next WHERE GameId=@g";
-                using SqlCommand cmd = new SqlCommand(sql, sqlConnection);
-                cmd.Parameters.AddWithValue("@next", nextTurn);
-                cmd.Parameters.AddWithValue("@g", gameId);
-                cmd.ExecuteNonQuery();
+                string sqlextra = "UPDATE Games SET ExtraTurns = ExtraTurns -1 WHERE GameId=@g";
+                using SqlCommand extracmd = new SqlCommand(sqlextra, sqlConnection);
+                extracmd.Parameters.AddWithValue("@g", gameId);
+                extracmd.ExecuteNonQuery();
+                return BoxResult.Empty;
             }
+
+            string sql = "UPDATE Games SET CurrentTurnPlayerId=@next WHERE GameId=@g";
+            using SqlCommand cmd = new SqlCommand(sql, sqlConnection);
+            cmd.Parameters.AddWithValue("@next", nextTurn);
+            cmd.Parameters.AddWithValue("@g", gameId);
+            cmd.ExecuteNonQuery();
+            return BoxResult.Empty;
         }
     }
 

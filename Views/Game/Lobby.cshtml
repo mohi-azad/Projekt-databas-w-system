@@ -1,0 +1,61 @@
+﻿@model List<GameLobby>
+
+<h2 class="text-center mt-4">Game Lobby</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success text-center">@TempData["Message"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger text-center">@TempData["Error"]</div>
+}
+
+<table class="table table-striped mt-4">
+    <thead>
+        <tr>
+            <th>Game ID</th>
+            <th>Player1</th>
+            <th>Player2</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var g in Model)
+        {
+            <tr>
+                <td>@g.GameId</td>
+                <td>@g.Player1Name</td>
+                <td>@(g.Player2Name ?? "Waiting...")</td>
+                <td>@(g.IsFinished ? "Finished" : "In Progress")</td>
+                <td>
+                    @if (g.Player2Id == null)
+                    {
+                        <form method="post" asp-action="JoinGame" asp-route-gameId="@g.GameId">
+                            <button type="submit" class="btn btn-primary">Join</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a class="btn btn-success" asp-action="Play" asp-route-id="@g.GameId">Enter</a>
+                    }
+
+                    <form method="post" asp-action="DeleteGame" asp-controller="Game">
+                        <input type="hidden" name="gameId" value="@g.GameId" />
+                        <button type="submit" class="btn btn-danger">Delete Game</button>
+                    </form>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="text-center mt-4">
+    <a class="btn btn-success" asp-controller="Game" asp-action="CreateGame">New Game</a>
+</div>
+
+<div class="text-center mt-2">
+    <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Back to Menu</a>
+</div>

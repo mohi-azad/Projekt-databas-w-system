@@ -13,6 +13,6 @@
         public bool ExtraTurns { get; set; }
         public string Player1Name {  get; set; }
         public string Player2Name { get; set; }
-        public List<Box> Boxes { get; set; }
+        public List<BoxDetails> Boxes { get; set; }
     }
 }

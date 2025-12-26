@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Projekt_databas_och_w_system.Models;
-using Projekt_databas_och_w_system.Models.Details;
+using Projekt_databas_och_w_system.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using System.Threading.Tasks;
 
 namespace Projekt_databas_och_w_system.Controllers
 {
@@ -9,7 +11,13 @@ namespace Projekt_databas_och_w_system.Controllers
         // Instanser av metoder
         private readonly GameMethods _gameMethods = new();
         private readonly MoveMethods _moveMethods = new();
+        private readonly IHubContext<GameHub> _hub;
 
+        // metod för att skicka SignalR meddelanden
+        public GameController(IHubContext<GameHub> hub)
+        {
+            _hub = hub;
+        }
         // ----------------------------
         // LOBBY
         // ----------------------------
@@ -38,18 +46,23 @@ namespace Projekt_databas_och_w_system.Controllers
         // JOIN GAME
         // ----------------------------
         [HttpPost]
-        public IActionResult JoinGame(int gameId)
+        public async Task<IActionResult> JoinGame(int gameId)
         {
             int? playerId = HttpContext.Session.GetInt32("PlayerId");
             if (playerId == null) return RedirectToAction("Login", "Login");
 
             bool joined = _gameMethods.JoinGame(gameId, playerId.Value);
-            if (!joined)
+            if (joined)
+            {
+                await _hub.Clients
+                    .Group($"game_{gameId}")
+                    .SendAsync("playerJoined");
+            }
+            else
             {
                 TempData["Error"] = "Another player already joined the game!";
             }
-
-            return RedirectToAction("Play", new { id = gameId });
+                return RedirectToAction("Play", new { id = gameId });
         }
 
         // ----------------------------
@@ -76,21 +89,43 @@ namespace Projekt_databas_och_w_system.Controllers
         // OPEN BOX / MAKE MOVE
         // ----------------------------
         [HttpPost]
-        public IActionResult OpenBox(int gameId, int boxId)
+        public async Task<IActionResult> OpenBox(int gameId, int boxId)
         {
             int? playerId = HttpContext.Session.GetInt32("PlayerId");
-            if (playerId == null) return RedirectToAction("Login", "Login");
+            if (playerId == null) 
+                return RedirectToAction("Login", "Login");
 
             try
             {
-                _gameMethods.PlayerOpenBox(gameId, playerId.Value, boxId);
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
+                BoxResult result = _gameMethods.PlayerOpenBox(gameId, playerId.Value, boxId);
+
+                // meddela spelarna i spelet
+                await _hub.Clients
+                    .Group($"game_{gameId}")
+                    .SendAsync("GameUpdated");
+
+                if(result== BoxResult.Bomb)
+                {
+                    await _hub.Clients
+                .Group($"player_{playerId.Value}")
+                .SendAsync("BoxResult", "💣 BOOM! You hit a bomb!");
+                }
+                else if(result== BoxResult.Gold)
+                {
+                    await _hub.Clients
+                    .Group($"player_{playerId.Value}")
+                .SendAsync("BoxResult", "🏆 You found the gold!");
+                }
             }
 
-            return RedirectToAction("Play", new { id = gameId });
+            catch (Exception ex)
+            {
+                await _hub.Clients
+                    .Group($"player_{playerId.Value}")
+                    .SendAsync("ErrorMessage", ex.Message);
+
+            }
+            return Ok();
         }
 
         // ----------------------------

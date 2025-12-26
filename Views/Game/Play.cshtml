@@ -1,0 +1,166 @@
+﻿@model List<Projekt_databas_och_w_system.Models.Details.BoxDetails>
+
+@{
+    ViewBag.Title = "Play Game";
+    bool isFinished = ViewBag.IsFinished ?? false;
+    int? winner = ViewBag.WinnerPlayerId;
+
+    int? currentPlayerId = ViewBag.PlayerId;
+    string message = "";
+    if (isFinished)
+    {
+        if (winner == currentPlayerId)
+            message = "You have won the game!";
+        else
+            message = "Your opponent has won the game!";
+    }
+}
+
+
+<div class="container mt-4">
+    <h2 class="text-center">Game @ViewBag.GameId</h2>
+
+    @if (ViewBag.Player2Id == null)
+    {
+        <div id="waitingMessage" class="alert alert-warning text-center">
+            Waiting for player 2 to join the game...
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger text-center">
+            @TempData["Error"]
+        </div>
+    }
+
+    @if (TempData["GoldMessage"] != null)
+    {
+        <div class="alert alert-success text-center">
+            @TempData["GoldMessage"]
+        </div>
+    }
+
+    @if (isFinished)
+    {
+        <div class="alert alert-success text-center">
+            <h4>@message</h4>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            <strong>Current turn:</strong> Player @ViewBag.CurrentTurn
+        </div>
+    }
+
+    <hr />
+
+    <h4 class="text-center mb-3">Select a box:</h4>
+
+    <div class="row justify-content-center">
+        @foreach (var box in Model)
+        {
+            <div class="col-3 col-md-2 text-center mb-3">
+
+                <button type="button"
+                        class="btn btn-lg w-100
+                @(box.IsOpen
+                            ? "btn-success"
+                            : (box.IsGold
+                                ? "btn-warning"
+                                : (box.IsBomb
+                                    ? "btn-danger"
+                                    : "btn-primary")))"
+                    onclick="openBox(@ViewBag.GameId, @box.BoxId)"
+                    @(box.IsOpen || isFinished ? "disabled" : "")>
+
+                    @(box.IsOpen ? "✔" : "?")
+                </button>
+
+                <small>Box @box.PositionIndex</small>
+            </div>
+                }
+    </div>
+
+    <hr />
+
+    <div class="text-center mt-3">
+        <a href="/Home/Index" class="btn btn-secondary">Back to menu</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <script>
+        const gameId = "@ViewBag.GameId";
+        const playerId = "@ViewBag.PlayerId";
+
+        let moveLocked = false;
+        let bombTriggered = false;
+
+        function openBox(gameId, boxId) {
+            if (moveLocked) return;
+            moveLocked = true;
+
+            fetch("/Game/OpenBox", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `gameId=${gameId}&boxId=${boxId}`
+            });
+        }
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/gameHub")
+            .build();
+
+        // 🔥 Bombmeddelande – bara till spelaren som klickade
+        connection.on("BoxResult", message => {
+            bombTriggered = true;
+
+            const alert = document.createElement("div");
+            alert.className = "alert alert-danger text-center";
+            alert.innerText = message;
+            document.querySelector(".container").prepend(alert);
+
+            setTimeout(() => location.reload(), 2500);
+        });
+
+        // ❌ Fel (fel tur etc.)
+        connection.on("ErrorMessage", message => {
+            const alert = document.createElement("div");
+            alert.className = "alert alert-warning text-center";
+            alert.innerText = message;
+            document.querySelector(".container").prepend(alert);
+
+            setTimeout(() => alert.remove(), 2000);
+            moveLocked = false;
+        });
+
+        // 🔄 Vanlig uppdatering
+        connection.on("GameUpdated", () => {
+            if (bombTriggered) return;
+            setTimeout(() => location.reload(), 500);
+        });
+
+        // 👤 Spelare 2 anslöt
+        connection.on("PlayerJoined", () => {
+            document.getElementById("waitingMessage")?.remove();
+
+            const alert = document.createElement("div");
+            alert.className = "alert alert-success text-center";
+            alert.innerText = "Player 2 has joined the game!";
+            document.querySelector(".container").prepend(alert);
+
+            setTimeout(() => location.reload(), 1000);
+        });
+
+        connection.start()
+            .then(() => Promise.all([
+                connection.invoke("JoinGameGroup", "game_" + gameId),
+                connection.invoke("JoinPlayerGroup", "player_" + playerId)
+            ]))
+            .catch(console.error);
+    </script>
+}
