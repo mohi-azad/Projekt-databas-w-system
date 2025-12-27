@@ -15,6 +15,22 @@
             message = "Your opponent has won the game!";
     }
 }
+@{
+    string currentTurnName = "";
+
+    if (ViewBag.CurrentTurn == ViewBag.PlayerId)
+    {
+        currentTurnName = "You";
+    }
+    else if (ViewBag.CurrentTurn == ViewBag.Player2Id)
+    {
+        currentTurnName = ViewBag.Player2Name;
+    }
+    else
+    {
+        currentTurnName = ViewBag.Player1Name;
+    }
+}
 
 
 <div class="container mt-4">
@@ -43,19 +59,19 @@
 
     @if (isFinished)
     {
-        <div class="alert alert-success text-center">
-            <h4>@message</h4>
+        <div class="alert alert-info text-center">
+            <strong>Current turn:</strong> @currentTurnName
         </div>
     }
     else
     {
         <div class="alert alert-info text-center">
-            <strong>Current turn:</strong> Player @ViewBag.CurrentTurn
+            <strong>Current turn:</strong> @currentTurnName
         </div>
     }
+   
 
     <hr />
-
     <h4 class="text-center mb-3">Select a box:</h4>
 
     <div class="row justify-content-center">
@@ -115,7 +131,7 @@
             .withUrl("/gameHub")
             .build();
 
-        // 🔥 Bombmeddelande – bara till spelaren som klickade
+        // bombmeddelande, bara till spelaren som klickade
         connection.on("BoxResult", message => {
             bombTriggered = true;
 
@@ -127,7 +143,7 @@
             setTimeout(() => location.reload(), 2500);
         });
 
-        // ❌ Fel (fel tur etc.)
+        // felmeddelande
         connection.on("ErrorMessage", message => {
             const alert = document.createElement("div");
             alert.className = "alert alert-warning text-center";
@@ -138,13 +154,13 @@
             moveLocked = false;
         });
 
-        // 🔄 Vanlig uppdatering
+        // vanlig uppdatering
         connection.on("GameUpdated", () => {
             if (bombTriggered) return;
             setTimeout(() => location.reload(), 500);
         });
 
-        // 👤 Spelare 2 anslöt
+        // spelare 2 anslöt
         connection.on("PlayerJoined", () => {
             document.getElementById("waitingMessage")?.remove();
 

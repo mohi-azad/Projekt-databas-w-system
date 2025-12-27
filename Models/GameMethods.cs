@@ -34,18 +34,28 @@ namespace Projekt_databas_och_w_system.Models
 
 
         // metod för att hämta spelstatus och boxar från BoxMethods
-        public (List<BoxDetails> boxes, int currentTurn, bool isFinished, int? winnerId, int? player2Id) GetGameState(int gameId)
+        public (List<BoxDetails> boxes, int currentTurn, bool isFinished, int? winnerId, int? player2Id, string player1Name, string player2Name) GetGameState(int gameId)
         {
             int currentTurn = 0;
             bool isFinished = false;
             int? winnerId = null;
             int? player2Id = null;
+            string player1Name = "";
+            string player2Name = "";
 
             using SqlConnection sqlConnection = new(ConnectionString);
             sqlConnection.Open();
             string gameSql = @"
-                    SELECT CurrentTurnPlayerId, IsFinished, WinnerPlayerId, Player2Id
-                    FROM Games WHERE GameId=@id";
+                SELECT g.CurrentTurnPlayerId,
+                    g.IsFinished,
+                    g.WinnerPlayerId,
+                    g.Player2Id,
+                    p1.PlayerName,
+                    p2.PlayerName
+                FROM Games g
+                JOIN Players p1 ON g.Player1Id = p1.PlayerId
+                LEFT JOIN Players p2 ON g.Player2Id = p2.PlayerId
+                WHERE g.GameId = @id";
 
             using (SqlCommand cmd = new SqlCommand(gameSql, sqlConnection))
             {
@@ -58,12 +68,16 @@ namespace Projekt_databas_och_w_system.Models
                     isFinished = reader.GetBoolean(1);
                     if (!reader.IsDBNull(2)) winnerId = reader.GetInt32(2);
                     if (!reader.IsDBNull(3)) player2Id = reader.GetInt32(3);
+
+                    player1Name= reader.GetString(4);
+                    if (!reader.IsDBNull(5))
+                        player2Name = reader.GetString(5);
                 }
 
             }            
             // Hämta boxarna via BoxMethods
             List<BoxDetails> boxes = _boxMethods.GetBoxes(sqlConnection, gameId);
-            return (boxes, currentTurn, isFinished, winnerId, player2Id);
+            return (boxes, currentTurn, isFinished, winnerId, player2Id, player1Name, player2Name);
         }
 
 
@@ -74,16 +88,30 @@ namespace Projekt_databas_och_w_system.Models
             sqlConnection.Open();
 
             // kollar om player2 har gått med i spelet
-            string checkSql = "SELECT Player2Id FROM Games WHERE GameId=@g";
-            using SqlCommand checkCmd = new SqlCommand(checkSql, sqlConnection);
-            checkCmd.Parameters.AddWithValue("@g", gameId);
+            string checkSql = "SELECT Player1Id, Player2Id FROM Games WHERE GameId=@g";
+            int player1Id;
+            object player2obj;
+            using (SqlCommand cmd = new SqlCommand(checkSql, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("@g", gameId);
+                using var reader = cmd.ExecuteReader();
+                if (!reader.Read()) return false;
 
-            object result = checkCmd.ExecuteScalar();
-            if (result != DBNull.Value) return false;
-           
-            string updateSql = "UPDATE Games SET Player2Id=@p WHERE GameId=@g";
+                player1Id= reader.GetInt32(0);
+                player2obj = reader[1];       
+            }
+            if (player2obj != DBNull.Value) return false;
+
+            // slumpa vem som ska börja
+            int randomstart = new Random().Next(0, 2) == 0 
+                ? player1Id 
+                : playerId;
+
+
+            string updateSql = "UPDATE Games SET Player2Id=@p, CurrentTurnPlayerId=@turn WHERE GameId=@g";
             using SqlCommand updateCmd = new SqlCommand(updateSql, sqlConnection);
             updateCmd.Parameters.AddWithValue("@p", playerId);
+            updateCmd.Parameters.AddWithValue("@turn", randomstart);
             updateCmd.Parameters.AddWithValue("@g", gameId);
             updateCmd.ExecuteNonQuery();
             return true;
@@ -179,7 +207,7 @@ namespace Projekt_databas_och_w_system.Models
             using SqlConnection sqlConnection = new(ConnectionString);
             sqlConnection.Open();
             // kontrollera vems tur är det i spelet
-            string turnchecksql = @"SELECT CurrentTurnPlayerId, IsFinished, player2Id FROM Games WHERE GameId= @g";
+            string turnchecksql = @"SELECT CurrentTurnPlayerId, IsFinished, Player2Id FROM Games WHERE GameId= @g";
 
             using(SqlCommand checkcmd= new SqlCommand(turnchecksql, sqlConnection))
             {
@@ -187,52 +215,42 @@ namespace Projekt_databas_och_w_system.Models
                 using var reader= checkcmd.ExecuteReader();
                 if (!reader.Read())
                     throw new Exception("Game not found");
-
-                bool isFinished= reader.GetBoolean(1);
-                int currentTurnPlayerId= reader.GetInt32(0);
-
-                if (isFinished)
+   
+                if (reader.GetBoolean(1))
                     throw new Exception("Game is already finished");
 
-                if (currentTurnPlayerId != playerId)
+                if (reader.GetInt32(0) != playerId)
                     throw new Exception("It is not your turn!");
 
                 if (reader.IsDBNull(2))
-                {
-                    throw new Exception("Waiting for second player!");
-                }
+                    throw new Exception("Waiting for second player!");               
             }
 
-            // öppna box
+            // öppna box och gör ett drag
             BoxDetails box = _boxMethods.OpenBox(sqlConnection, boxId);
-            // göra ett drag
             _moveMethods.AddMove(sqlConnection, gameId, playerId, boxId);
 
             // hämta aktuell tur, nästa spelare och extra tur
-            int currentTurn = 0;
-            int nextTurn = 0;
-            int extraTurns = 0;
+            int currentTurn;
+            int nextTurn;
+            int extraTurns;
 
             string turnSql = "SELECT CurrentTurnPlayerId, Player1Id, Player2Id, ExtraTurns FROM Games WHERE GameId=@g";
             using (SqlCommand turnCmd = new SqlCommand(turnSql, sqlConnection))
             {
                 turnCmd.Parameters.AddWithValue("@g", gameId);
-                using (var reader = turnCmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        currentTurn = (int)reader["CurrentTurnPlayerId"];
-                        int player1 = (int)reader["Player1Id"];
-                        int player2 = (int)reader["Player2Id"];
-                        extraTurns = reader["ExtraTurns"] != DBNull.Value ? (int)reader["ExtraTurns"] : 0;
+                using var reader = turnCmd.ExecuteReader();
+                reader.Read();
 
-                        // Beräkna nästa spelare
-                        nextTurn = (currentTurn == player1) ? player2 : player1;
-                    }
-                }
+                currentTurn= reader.GetInt32(0);
+                int player1= reader.GetInt32(1);
+                int player2= reader.GetInt32(2);
+                extraTurns= reader.IsDBNull(3) ? 0 : reader.GetInt32(3);
+                nextTurn = currentTurn == player1 ? player2 : player1;                   
             }
 
             // hantera vad som finns i en box
+            // 1. om den innehåller guldbiten
             if (box.IsGold)
             {
                 string sqlgold = "UPDATE Games SET WinnerPlayerId=@p, IsFinished=1 WHERE GameId=@g";
@@ -242,15 +260,17 @@ namespace Projekt_databas_och_w_system.Models
                 goldcmd.ExecuteNonQuery();
                 return BoxResult.Gold;
             }
-            if (box.IsGold)
+            // 2.om boxen innehåller en "bomb"
+            if (box.IsBomb)
             {
-                string sqlbomb = "UPDATE Games SET CurrentTurnPlayerId=@next WHERE GameId=@g";
+                string sqlbomb = "UPDATE Games SET CurrentTurnPlayerId=@next, ExtraTurns = 1 WHERE GameId=@g";
                 using SqlCommand bombcmd = new SqlCommand(sqlbomb, sqlConnection);
                 bombcmd.Parameters.AddWithValue("@next", nextTurn);
                 bombcmd.Parameters.AddWithValue("@g", gameId);
                 bombcmd.ExecuteNonQuery();
                 return BoxResult.Bomb;
             }
+            // extra tur för en spelare
             if(extraTurns > 0)
             {
                 string sqlextra = "UPDATE Games SET ExtraTurns = ExtraTurns -1 WHERE GameId=@g";
@@ -259,7 +279,7 @@ namespace Projekt_databas_och_w_system.Models
                 extracmd.ExecuteNonQuery();
                 return BoxResult.Empty;
             }
-
+            // 3. om den är tomm
             string sql = "UPDATE Games SET CurrentTurnPlayerId=@next WHERE GameId=@g";
             using SqlCommand cmd = new SqlCommand(sql, sqlConnection);
             cmd.Parameters.AddWithValue("@next", nextTurn);
