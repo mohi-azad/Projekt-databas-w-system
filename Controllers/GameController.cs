@@ -76,11 +76,12 @@ namespace Projekt_databas_och_w_system.Controllers
             var state = _gameMethods.GetGameState(id);
 
             ViewBag.GameId = id;
-            ViewBag.Player1Name = state.player1Name;
-            ViewBag.Player1Name = state.player1Name;
+            ViewBag.Player1Name= state.player1Name;
+            ViewBag.Player2Name = state.player2Name;
             ViewBag.CurrentTurn = state.currentTurn;
             ViewBag.IsFinished = state.isFinished;
             ViewBag.WinnerPlayerId = state.winnerId;
+            ViewBag.Player1Id = state.player1Id;
             ViewBag.Player2Id = state.player2Id;
             ViewBag.PlayerId = playerId.Value;
             

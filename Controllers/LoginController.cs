@@ -1,9 +1,13 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using System.Reflection.Metadata.Ecma335;
+using AspNetCoreGeneratedDocument;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Projekt_databas_och_w_system.Models;
 namespace Projekt_databas_och_w_system.Controllers
 {
     public class LoginController : Controller
     {
+        private readonly PlayerMethods _playerMethods = new();
         private string ConnectionString =>
     "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=HiddenGold;Integrated Security=True;";
 
@@ -48,5 +52,33 @@ namespace Projekt_databas_och_w_system.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
+
+        // metod för att kontrollera regisreringen 
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Register(string username, string password)
+        {
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                ViewBag.Error = "All fields are required";
+                return View();
+            }
+
+            var success = _playerMethods.RegisterPlayer(username, password);
+
+            if (!success)
+            {
+                ViewBag.Error = "Username already exists";
+                return View();
+            }
+
+            return RedirectToAction("Login", "Login");
+        }
+
     }
 }

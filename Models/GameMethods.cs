@@ -34,11 +34,12 @@ namespace Projekt_databas_och_w_system.Models
 
 
         // metod för att hämta spelstatus och boxar från BoxMethods
-        public (List<BoxDetails> boxes, int currentTurn, bool isFinished, int? winnerId, int? player2Id, string player1Name, string player2Name) GetGameState(int gameId)
+        public (List<BoxDetails> boxes, int currentTurn, bool isFinished, int? winnerId, int player1Id, int? player2Id, string player1Name, string player2Name) GetGameState(int gameId)
         {
             int currentTurn = 0;
             bool isFinished = false;
             int? winnerId = null;
+            int player1Id = 0;
             int? player2Id = null;
             string player1Name = "";
             string player2Name = "";
@@ -49,6 +50,7 @@ namespace Projekt_databas_och_w_system.Models
                 SELECT g.CurrentTurnPlayerId,
                     g.IsFinished,
                     g.WinnerPlayerId,
+                    g.Player1Id,
                     g.Player2Id,
                     p1.PlayerName,
                     p2.PlayerName
@@ -66,18 +68,25 @@ namespace Projekt_databas_och_w_system.Models
                 {
                     currentTurn = reader.GetInt32(0);
                     isFinished = reader.GetBoolean(1);
-                    if (!reader.IsDBNull(2)) winnerId = reader.GetInt32(2);
-                    if (!reader.IsDBNull(3)) player2Id = reader.GetInt32(3);
 
-                    player1Name= reader.GetString(4);
-                    if (!reader.IsDBNull(5))
-                        player2Name = reader.GetString(5);
+                    if (!reader.IsDBNull(2))
+                        winnerId = reader.GetInt32(2);
+
+                    player1Id = reader.GetInt32(3);
+
+                    if (!reader.IsDBNull(4))
+                        player2Id = reader.GetInt32(4);
+
+                    // 👇 RÄTT index + NULL-skydd
+                    player1Name = reader.GetString(5);
+
+                    if (!reader.IsDBNull(6))
+                        player2Name = reader.GetString(6);
                 }
-
-            }            
+            }
             // Hämta boxarna via BoxMethods
             List<BoxDetails> boxes = _boxMethods.GetBoxes(sqlConnection, gameId);
-            return (boxes, currentTurn, isFinished, winnerId, player2Id, player1Name, player2Name);
+            return (boxes, currentTurn, isFinished, winnerId, player1Id,player2Id, player1Name, player2Name);
         }
 
 

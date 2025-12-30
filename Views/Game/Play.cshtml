@@ -6,16 +6,16 @@
     int? winner = ViewBag.WinnerPlayerId;
 
     int? currentPlayerId = ViewBag.PlayerId;
-    string message = "";
+    string resultMessage = "";
     if (isFinished)
     {
         if (winner == currentPlayerId)
-            message = "You have won the game!";
+            resultMessage = "You have won the game!";
         else
-            message = "Your opponent has won the game!";
+            resultMessage = "Your opponent has won the game!";
     }
-}
-@{
+
+    // nuvarande spelarnamn
     string currentTurnName = "";
 
     if (ViewBag.CurrentTurn == ViewBag.PlayerId)
@@ -59,8 +59,8 @@
 
     @if (isFinished)
     {
-        <div class="alert alert-info text-center">
-            <strong>Current turn:</strong> @currentTurnName
+        <div class="alert alert-success text-center">
+            <h4>@resultMessage</h4>
         </div>
     }
     else
@@ -69,8 +69,7 @@
             <strong>Current turn:</strong> @currentTurnName
         </div>
     }
-   
-
+    
     <hr />
     <h4 class="text-center mb-3">Select a box:</h4>
 
