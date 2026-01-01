@@ -72,7 +72,4 @@ public class PlayerMethods
         return Convert.ToBase64String(bytes);
     }
 
-
-
-
 }

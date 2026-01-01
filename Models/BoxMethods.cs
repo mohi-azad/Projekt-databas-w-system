@@ -9,13 +9,13 @@ namespace Projekt_databas_och_w_system.Models
         public void CreateBoxes(SqlConnection connection, int gameId)
         {
             Random rng = new Random();
-            int goldIndex = rng.Next(10);
+            int goldIndex = rng.Next(20);
             HashSet<int> bombs = new HashSet<int>();
             
             // lägger till antal bomber
             while(bombs.Count < 7)
             {
-                int b= rng.Next(10);
+                int b= rng.Next(20);
                 if(b != goldIndex)
                 {
                     bombs.Add(b);
@@ -23,7 +23,7 @@ namespace Projekt_databas_och_w_system.Models
             }
 
             // lägger objekt i boxarna
-            for(int i= 0; i < 10; i++)
+            for(int i= 0; i < 20; i++)
             {
                 string sqlstring = @"
                     INSERT INTO Boxes (GameId, PositionIndex, IsBomb, IsGold)

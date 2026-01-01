@@ -22,16 +22,17 @@ namespace Projekt_databas_och_w_system.Controllers
         public IActionResult Login(string username, string password)
         {
             using SqlConnection sqlConnection = new(ConnectionString);
-            
-           
+                     
             // öppnar databasen
             sqlConnection.Open();
             {
+                // HASHA lösenordet INNAN du jämför
+                string hashedPassword = _playerMethods.HashPassword(password);
                 // kontrollerar inloggningen mha SQL-satser
                 string sql = "SELECT PlayerId FROM Players WHERE PlayerName=@username AND PasswordHash=@password";
                 SqlCommand command= new SqlCommand(sql, sqlConnection);
                 command.Parameters.AddWithValue("@username", username);
-                command.Parameters.AddWithValue("@password", password);
+                command.Parameters.AddWithValue("@password", hashedPassword);
                 var reader = command.ExecuteReader();
                 
                 // kollar om användaren finns
@@ -40,7 +41,7 @@ namespace Projekt_databas_och_w_system.Controllers
                     ViewBag.Error = "Fel användarnamn eller lösenord";
                     return View();
                 }
-                int playerId = (int)reader["PlayerId"];
+                int playerId = reader.GetInt32(0);
                 // hämtar playerId och lagrar det i session
                 HttpContext.Session.SetInt32("PlayerId", playerId);
                 return RedirectToAction("Lobby", "Game");
