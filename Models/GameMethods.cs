@@ -296,5 +296,4 @@ namespace Projekt_databas_och_w_system.Models
             return BoxResult.Empty;
         }
     }
-
 }
