@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Microsoft.VisualBasic;
 using Projekt_databas_och_w_system.Models.Details;
 
 namespace Projekt_databas_och_w_system.Models

@@ -80,18 +80,34 @@
 
                 <button type="button"
                         class="btn btn-lg w-100
-                @(box.IsOpen
-                            ? "btn-success"
-                            : (box.IsGold
-                                ? "btn-warning"
-                                : (box.IsBomb
-                                    ? "btn-danger"
-                                    : "btn-primary")))"
+            @(box.IsOpen || isFinished
+                                    ? (box.IsGold
+                                        ? "btn-warning gold-glow box-pop"
+                                        : box.IsBomb
+                                            ? "btn-danger bomb-shake box-pop"
+                                            : "btn-success box-pop")
+                                    : "btn-primary")"
                     onclick="openBox(@ViewBag.GameId, @box.BoxId)"
                     @(box.IsOpen || isFinished ? "disabled" : "")>
 
-                    @(box.IsOpen ? "✔" : "?")
+                @if (box.IsGold && (box.IsOpen || isFinished))
+                    {
+                        <span>💰</span>
+                    }
+                    else if (box.IsBomb && (box.IsOpen || isFinished))
+                    {
+                        <span>💣</span>
+                    }
+                    else if (box.IsOpen)
+                    {
+                        <span>✔</span>
+                    }
+                    else
+                    {
+                        <span>?</span>
+                    }
                 </button>
+
 
                 <small>Box @box.PositionIndex</small>
             </div>

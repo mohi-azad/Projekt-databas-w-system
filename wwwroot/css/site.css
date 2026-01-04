@@ -1,5 +1,66 @@
+/* 
+Animation för boxar
+*/
+
+.box-pop{
+    animation: pop 0.3s ease-out;
+}
+@keyframes pop{
+    0%{transform: scale(0.8);}
+    60%{transform: scale(1,1);}
+    100%{transform: scale(1);}
+}
+
+/* Guldanimation */
+.gold-glow {
+    animation: goldGlow 1.2s infinite alternate;
+}
+
+@keyframes goldGlow {
+    from {
+        box-shadow: 0 0 5px gold;
+        transform: scale(1);
+    }
+
+    to {
+        box-shadow: 0 0 20px gold;
+        transform: scale(1.08);
+    }
+}
+
+/* Bombskakning */
+.bomb-shake {
+    animation: shake 0.4s;
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
+
+    75% {
+        transform: translateX(-5px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+
+
+
+
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
@@ -29,3 +90,4 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
