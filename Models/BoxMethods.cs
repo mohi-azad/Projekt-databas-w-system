@@ -5,17 +5,18 @@ namespace Projekt_databas_och_w_system.Models
 {
     public class BoxMethods
     {
-
-        public void CreateBoxes(SqlConnection connection, int gameId)
+        // metod för att skapa boxar
+        public void CreateBoxes(SqlConnection connection, int gameId, int boxCount, int bombCount)
         {
             Random rng = new Random();
-            int goldIndex = rng.Next(20);
+            int goldIndex = rng.Next(boxCount);
+
+            // antal bomber baserad på boxar
             HashSet<int> bombs = new HashSet<int>();
-            
             // lägger till antal bomber
-            while(bombs.Count < 7)
+            while(bombs.Count < bombCount)
             {
-                int b= rng.Next(20);
+                int b= rng.Next(boxCount);
                 if(b != goldIndex)
                 {
                     bombs.Add(b);
@@ -23,7 +24,7 @@ namespace Projekt_databas_och_w_system.Models
             }
 
             // lägger objekt i boxarna
-            for(int i= 0; i < 20; i++)
+            for(int i= 0; i < boxCount; i++)
             {
                 string sqlstring = @"
                     INSERT INTO Boxes (GameId, PositionIndex, IsBomb, IsGold)

@@ -33,12 +33,20 @@ namespace Projekt_databas_och_w_system.Controllers
         // ----------------------------
         // CREATE GAME
         // ----------------------------
+        [HttpGet]
         public IActionResult CreateGame()
+        {
+            return View();
+        }
+
+
+        [HttpPost]
+        public IActionResult CreateGame(int boxCount, int bombCount)
         {
             int? playerId = HttpContext.Session.GetInt32("PlayerId");
             if (playerId == null) return RedirectToAction("Login", "Login");
 
-            int gameId = _gameMethods.CreateGame(playerId.Value);
+            int gameId = _gameMethods.CreateGame(playerId.Value, boxCount,bombCount);
             return RedirectToAction("Play", new { id = gameId });
         }
 
@@ -143,5 +151,7 @@ namespace Projekt_databas_och_w_system.Controllers
             _gameMethods.DeleteGame(gameId);
             return RedirectToAction("Lobby");
         }
+
+       
     }
 }

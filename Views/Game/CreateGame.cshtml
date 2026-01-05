@@ -1,0 +1,21 @@
+﻿<h2>Create Game</h2>
+
+<form asp-action="CreateGame" method="post">
+    <label>Number of boxes</label>
+    <select name="boxCount" class="form-control">
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
+        <option value="30">30</option>
+    </select>
+
+    <label class="mt-2">Number of bombs</label>
+    <select name="bombCount" class="form-control">
+        <option value="3">3</option>
+        <option value="5">5</option>
+        <option value="7" selected>7</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary mt-3">
+        Create Game
+    </button>
+</form>

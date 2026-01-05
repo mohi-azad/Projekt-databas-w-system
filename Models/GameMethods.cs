@@ -13,21 +13,23 @@ namespace Projekt_databas_och_w_system.Models
 
 
         // metod för att skapa ett spel
-        public int CreateGame(int playerId)
-        {
+        public int CreateGame(int playerId, int boxCount, int bombCount)
+        {       
+            
             using SqlConnection sqlConnection = new (ConnectionString);
             sqlConnection.Open();
             string gameSql = @"
-                    INSERT INTO Games (CreatedByPlayerId, Player1Id, Player2Id, CurrentTurnPlayerId)
-                    VALUES (@p, @p, NULL, @p);
+                    INSERT INTO Games (CreatedByPlayerId, Player1Id, Player2Id, CurrentTurnPlayerId, BoxCount, BombCount)
+                    VALUES (@p, @p, NULL, @p, @boxCount, @bombCount);
                     SELECT SCOPE_IDENTITY();";
 
             using SqlCommand cmd = new SqlCommand(gameSql, sqlConnection);
             cmd.Parameters.AddWithValue("@p", playerId);
-
+            cmd.Parameters.AddWithValue("@boxCount", boxCount);
+            cmd.Parameters.AddWithValue("@bombCount", bombCount);
             int gameId = Convert.ToInt32(cmd.ExecuteScalar());
             // Skapa boxarna mha Boxmethods
-            _boxMethods.CreateBoxes(sqlConnection, gameId);
+            _boxMethods.CreateBoxes(sqlConnection, gameId, boxCount, bombCount);
             return gameId;
         }
 
