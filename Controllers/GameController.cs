@@ -2,8 +2,6 @@
 using Projekt_databas_och_w_system.Models;
 using Projekt_databas_och_w_system.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using System.Threading.Tasks;
-
 namespace Projekt_databas_och_w_system.Controllers
 {
     public class GameController : Controller
@@ -38,7 +36,6 @@ namespace Projekt_databas_och_w_system.Controllers
         {
             return View();
         }
-
 
         [HttpPost]
         public IActionResult CreateGame(int boxCount, int bombCount)
@@ -122,13 +119,13 @@ namespace Projekt_databas_och_w_system.Controllers
                 {
                     await _hub.Clients
                 .Group($"player_{playerId.Value}")
-                .SendAsync("BoxResult", "💣 BOOM! You hit a bomb!");
+                .SendAsync("BoxResult", "BOOM!!! You hit a bomb!");
                 }
                 else if(result== BoxResult.Gold)
                 {
                     await _hub.Clients
                     .Group($"player_{playerId.Value}")
-                .SendAsync("BoxResult", "🏆 You found the gold!");
+                .SendAsync("BoxResult", "You found the gold!");
                 }
             }
 
@@ -151,7 +148,5 @@ namespace Projekt_databas_och_w_system.Controllers
             _gameMethods.DeleteGame(gameId);
             return RedirectToAction("Lobby");
         }
-
-       
     }
 }

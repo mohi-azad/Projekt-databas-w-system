@@ -44,7 +44,7 @@
 
 
 <div class="container mt-4">
-    <h2 class="text-center">Game @ViewBag.GameId</h2>
+    <h3 class="text-center">Game @ViewBag.GameId</h3>
 
     @if (ViewBag.Player2Id == null)
     {
@@ -118,7 +118,7 @@
                     }
                 </button>
 
-                <small>Box @box.PositionIndex</small>
+                <small>Box @(box.PositionIndex +1)</small>
             </div>
                 }
     </div>
