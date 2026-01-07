@@ -6,9 +6,8 @@ public class MoveMethods
     // metod för att logga drag i ett spel
     public void AddMove(SqlConnection connection, int gameId, int playerId, int boxId)
     {
-        string sql = @"
-            INSERT INTO Moves (GameId, PlayerId, BoxId, CreatedAt)
-            VALUES (@game, @player, @box, GETDATE())";
+        // skapar och sparar vilket spel, spelare och box
+        string sql = @"INSERT INTO Moves (GameId, PlayerId, BoxId, CreatedAt) VALUES (@game, @player, @box, GETDATE())";
 
         using SqlCommand cmd = new SqlCommand(sql, connection);
         cmd.Parameters.AddWithValue("@game", gameId);
@@ -23,10 +22,8 @@ public class MoveMethods
     {
         List<MoveDetails> moves = new List<MoveDetails>();
         string sql = "SELECT MoveId, PlayerId, BoxId, MoveTime FROM Moves WHERE GameId=@game ORDER BY MoveTime";
-
         using SqlCommand cmd = new SqlCommand(sql, connection);
         cmd.Parameters.AddWithValue("@game", gameId);
-
         using SqlDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
         {

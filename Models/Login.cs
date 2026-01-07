@@ -5,4 +5,5 @@
         public string PlayerName { get; set; }
         public string PasswordHash { get; set; }
     }
+    
 }

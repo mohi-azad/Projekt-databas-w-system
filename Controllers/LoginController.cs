@@ -1,8 +1,5 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using AspNetCoreGeneratedDocument;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Projekt_databas_och_w_system.Models;
 namespace Projekt_databas_och_w_system.Controllers
 {
     public class LoginController : Controller
@@ -48,13 +45,14 @@ namespace Projekt_databas_och_w_system.Controllers
             }
         }
         
+        // metod för att kontrollera utloggningen
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
 
-        // metod för att kontrollera regisreringen 
+        // metod för att kontrollera regisreringen för en spelare
         [HttpGet]
         public IActionResult Register()
         {
@@ -71,15 +69,12 @@ namespace Projekt_databas_och_w_system.Controllers
             }
 
             var success = _playerMethods.RegisterPlayer(username, password);
-
             if (!success)
             {
                 ViewBag.Error = "Username already exists";
                 return View();
             }
-
             return RedirectToAction("Login", "Login");
         }
-
     }
 }

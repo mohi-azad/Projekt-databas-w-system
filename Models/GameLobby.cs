@@ -1,5 +1,10 @@
 ﻿namespace Projekt_databas_och_w_system.Models
 {
+    /*
+     * GameLobby
+     * definiera egenskaper och attribut denna klass ska ha
+     * anropas och används av klassen GameMethods
+     */
     public class GameLobby
     {
         public int GameId { get; set; }

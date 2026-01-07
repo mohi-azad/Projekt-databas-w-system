@@ -1,7 +1,6 @@
 ﻿using System.Security.Cryptography;
 using Microsoft.Data.SqlClient;
 using Projekt_databas_och_w_system.Models.Details;
-using System.Security.Cryptography;
 using System.Text;
 
 public class PlayerMethods
@@ -64,7 +63,7 @@ public class PlayerMethods
     }
 
 
-    // privatfunktion för att sätta in lösenord
+    // metod för att sätta in lösenord för en spelare
     public string HashPassword(string password)
     {
         using SHA256 sha = SHA256.Create();
