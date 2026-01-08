@@ -1,4 +1,5 @@
-﻿namespace Projekt_databas_och_w_system.Models
+﻿/*
+namespace Projekt_databas_och_w_system.Models
 {
     public class Login
     {
@@ -7,3 +8,4 @@
     }
     
 }
+*/

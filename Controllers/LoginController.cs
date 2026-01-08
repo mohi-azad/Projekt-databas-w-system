@@ -18,12 +18,11 @@ namespace Projekt_databas_och_w_system.Controllers
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
-            using SqlConnection sqlConnection = new(ConnectionString);
-                     
+            using SqlConnection sqlConnection = new(ConnectionString);                
             // öppnar databasen
             sqlConnection.Open();
             {
-                // HASHA lösenordet INNAN du jämför
+                // HASHA lösenordet innan jämförelse
                 string hashedPassword = _playerMethods.HashPassword(password);
                 // kontrollerar inloggningen mha SQL-satser
                 string sql = "SELECT PlayerId FROM Players WHERE PlayerName=@username AND PasswordHash=@password";
@@ -45,6 +44,7 @@ namespace Projekt_databas_och_w_system.Controllers
             }
         }
         
+        [HttpPost]
         // metod för att kontrollera utloggningen
         public IActionResult Logout()
         {
