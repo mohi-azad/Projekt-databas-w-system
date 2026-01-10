@@ -1,5 +1,6 @@
 ﻿namespace Projekt_databas_och_w_system.Models.Details
 {
+    
     public class GameDetails
     {
         public int GameId {  get; set; }
@@ -17,4 +18,5 @@
         public int BombCount { get; set; }
         public List<BoxDetails> Boxes { get; set; }
     }
+    
 }

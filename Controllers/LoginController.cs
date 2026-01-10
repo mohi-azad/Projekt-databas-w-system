@@ -6,7 +6,7 @@ namespace Projekt_databas_och_w_system.Controllers
     {
         private readonly PlayerMethods _playerMethods = new();
         private string ConnectionString =>
-    "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=HiddenGold;Integrated Security=True;";
+            "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=HiddenGold;Integrated Security=True;";
 
 
         [HttpGet]
@@ -43,8 +43,8 @@ namespace Projekt_databas_och_w_system.Controllers
                 return RedirectToAction("Lobby", "Game");
             }
         }
-        
-        [HttpPost]
+
+
         // metod för att kontrollera utloggningen
         public IActionResult Logout()
         {
