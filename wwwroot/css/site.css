@@ -11,42 +11,37 @@ Animation för boxar
     100%{transform: scale(1);}
 }
 
-/* Guldanimation */
+/* guldanimation */
 .gold-glow {
     animation: goldGlow 1.2s infinite alternate;
 }
 
-@keyframes goldGlow {
-    from {
+@keyframes goldGlow{
+    from{
         box-shadow: 0 0 5px gold;
         transform: scale(1);
     }
-
-    to {
+    to{
         box-shadow: 0 0 20px gold;
         transform: scale(1.08);
     }
 }
 
-/* Bombskakning */
-.bomb-shake {
+/* bombskakning */
+.bomb-shake{
     animation: shake 0.4s;
 }
-
 @keyframes shake {
-    0% {
+    0%{
         transform: translateX(0);
     }
-
-    25% {
+    25%{
         transform: translateX(-5px);
     }
-
     50% {
         transform: translateX(5px);
     }
-
-    75% {
+    75%{
         transform: translateX(-5px);
     }
 
@@ -54,6 +49,7 @@ Animation för boxar
         transform: translateX(0);
     }
 }
+
 
 /*
 css för titel och bilderna
@@ -65,12 +61,10 @@ css för titel och bilderna
     gap: 20px;
     margin-bottom: 10px;
 }
-
 .title-icon {
     width: 60px;
     height: auto;
 }
-
 .game-title {
     font-size: 3rem;
     font-weight: bold;
@@ -79,19 +73,62 @@ css för titel och bilderna
 }
 
 
+
 /*
-grundhtml
+css för font och typsnitt
 */
-html {
-    font-size: 14px;
+.navbar{
+    font-family: 'Bangers', sans-serif;
+    color: rgb(23, 21, 21);
 }
 
+.navbar-brand {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color:rgb(224, 221, 69);
+}
+.nav-link{
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+.title-row{
+    font-family: 'Bangers', sans-serif;
+    font-size: 32px;
+    font-weight: 400;
+}
+
+.title-row, h3{
+    letter-spacing: 4.6px; 
+}
+
+
+.text-center{
+    font-family: 'Shantell Sans', sans-serif;
+    color: rgb(86, 86, 86);
+    letter-spacing: 1px;
+}
+
+.home-title {
+    font-family: 'Bangers', sans-serif;
+    color: rgb(94, 182, 211);
+}
+
+
+    /*
+grundhtml
+*/
+
+
+html{
+    font-size: 14px;
+}
 @media (min-width: 768px) {
   html {
     font-size: 16px;
   }
 }
-
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }

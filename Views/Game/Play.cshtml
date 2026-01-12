@@ -127,6 +127,8 @@
     </div>
 </div>
 
+
+
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
@@ -152,7 +154,7 @@
             .withUrl("/gameHub")
             .build();
 
-        // bombmeddelande, bara till spelaren som klickade
+        // bombmeddelande bara till den spelaren som klickade
         connection.on("BoxResult", message => {
             bombTriggered = true;
 
@@ -160,8 +162,7 @@
             alert.className = "alert alert-danger text-center";
             alert.innerText = message;
             document.querySelector(".container").prepend(alert);
-
-            setTimeout(() => location.reload(), 2500);
+            setTimeout(() => location.reload(), 3500);
         });
 
         // felmeddelande
@@ -170,18 +171,17 @@
             alert.className = "alert alert-warning text-center";
             alert.innerText = message;
             document.querySelector(".container").prepend(alert);
-
-            setTimeout(() => alert.remove(), 2000);
+            setTimeout(() => alert.remove(), 2500);
             moveLocked = false;
         });
 
         // vanlig uppdatering
         connection.on("GameUpdated", () => {
             if (bombTriggered) return;
-            setTimeout(() => location.reload(), 500);
+            setTimeout(() => location.reload(), 3500);
         });
 
-        // spelare 2 anslöt
+        // spelare2 ansluter
         connection.on("PlayerJoined", () => {
             document.getElementById("waitingMessage")?.remove();
 
@@ -189,8 +189,7 @@
             alert.className = "alert alert-success text-center";
             alert.innerText = "Player 2 has joined the game!";
             document.querySelector(".container").prepend(alert);
-
-            setTimeout(() => location.reload(), 1000);
+            setTimeout(() => location.reload(), 1600);
         });
 
         connection.start()
