@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 namespace Projekt_databas_och_w_system.Controllers
 {
+
     public class LoginController : Controller
     {
         private readonly PlayerMethods _playerMethods = new();

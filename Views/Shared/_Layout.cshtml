@@ -28,7 +28,7 @@
 
                         @if (Context.Session.GetInt32("PlayerId") != null)
                         {
-                            <!-- INLOGGAD -->
+                            <!-- inloggad -->
 
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Game" asp-action="Lobby">
@@ -50,7 +50,7 @@
                         }
                         else
                         {
-                            <!-- EJ INLOGGAD -->
+                            <!-- ej inloggad -->
 
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Login" asp-action="Login">

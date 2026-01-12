@@ -16,9 +16,10 @@ namespace Projekt_databas_och_w_system.Controllers
         {
             _hub = hub;
         }
-        // ----------------------------
-        // LOBBY
-        // ----------------------------
+
+
+        
+        // Lobby
         public IActionResult Lobby()
         {
             int? playerId = HttpContext.Session.GetInt32("PlayerId");
@@ -28,9 +29,8 @@ namespace Projekt_databas_och_w_system.Controllers
             return View(games);
         }
 
-        // ----------------------------
-        // CREATE GAME
-        // ----------------------------
+  
+        // skapa spelet
         [HttpGet]
         public IActionResult CreateGame()
         {
@@ -47,9 +47,8 @@ namespace Projekt_databas_och_w_system.Controllers
             return RedirectToAction("Play", new { id = gameId });
         }
 
-        // ----------------------------
-        // JOIN GAME
-        // ----------------------------
+    
+        // gå med i spelet
         [HttpPost]
         public async Task<IActionResult> JoinGame(int gameId)
         {
@@ -70,9 +69,8 @@ namespace Projekt_databas_och_w_system.Controllers
                 return RedirectToAction("Play", new { id = gameId });
         }
 
-        // ----------------------------
-        // PLAY VIEW
-        // ----------------------------
+        
+        // spela 
         public IActionResult Play(int id)
         {
             int? playerId = HttpContext.Session.GetInt32("PlayerId");
@@ -89,16 +87,11 @@ namespace Projekt_databas_och_w_system.Controllers
             ViewBag.Player1Id = state.player1Id;
             ViewBag.Player2Id = state.player2Id;
             ViewBag.PlayerId = playerId.Value;
-            
-
-
 
             return View(state.boxes);
         }
 
-        // ----------------------------
-        // OPEN BOX / MAKE MOVE
-        // ----------------------------
+        // öppna box och gör drag
         [HttpPost]
         public async Task<IActionResult> OpenBox(int gameId, int boxId)
         {
@@ -139,9 +132,8 @@ namespace Projekt_databas_och_w_system.Controllers
             return Ok();
         }
 
-        // ----------------------------
-        // DELETE GAME
-        // ----------------------------
+        
+        // ta bort spel från lobby
         [HttpPost]
         public IActionResult DeleteGame(int gameId)
         {
