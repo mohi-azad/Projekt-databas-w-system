@@ -155,14 +155,20 @@
             .build();
 
         // bombmeddelande bara till den spelaren som klickade
-        connection.on("BoxResult", message => {
+        connection.on("BoxResult", (type,message) => {
             bombTriggered = true;
 
             const alert = document.createElement("div");
-            alert.className = "alert alert-danger text-center";
+
+            if(type== "gold"){
+                alert.className= "alert alert-success text-center";
+            }
+            else if(type== "bomb"){
+                alert.className= "alert alert-danger text-center";
+            }
             alert.innerText = message;
             document.querySelector(".container").prepend(alert);
-            setTimeout(() => location.reload(), 3500);
+            setTimeout(() => location.reload(), 2600);
         });
 
         // felmeddelande
@@ -178,7 +184,7 @@
         // vanlig uppdatering
         connection.on("GameUpdated", () => {
             if (bombTriggered) return;
-            setTimeout(() => location.reload(), 3500);
+            setTimeout(() => location.reload(), 2600);
         });
 
         // spelare2 ansluter

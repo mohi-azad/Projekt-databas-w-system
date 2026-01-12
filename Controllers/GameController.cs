@@ -119,13 +119,13 @@ namespace Projekt_databas_och_w_system.Controllers
                 {
                     await _hub.Clients
                 .Group($"player_{playerId.Value}")
-                .SendAsync("BoxResult", "BOOM!!! You hit a bomb!");
+                .SendAsync("BoxResult", "bomb","BOOM!!! You hit a bomb!");
                 }
                 else if(result== BoxResult.Gold)
                 {
                     await _hub.Clients
                     .Group($"player_{playerId.Value}")
-                .SendAsync("BoxResult", "You found the gold!");
+                .SendAsync("BoxResult", "gold", "You found the gold!");
                 }
             }
 
