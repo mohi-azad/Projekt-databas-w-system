@@ -168,7 +168,7 @@
             }
             alert.innerText = message;
             document.querySelector(".container").prepend(alert);
-            setTimeout(() => location.reload(), 2600);
+            setTimeout(() => location.reload(), 2000);
         });
 
         // felmeddelande
@@ -184,7 +184,7 @@
         // vanlig uppdatering
         connection.on("GameUpdated", () => {
             if (bombTriggered) return;
-            setTimeout(() => location.reload(), 2600);
+            setTimeout(() => location.reload(), 2000);
         });
 
         // spelare2 ansluter

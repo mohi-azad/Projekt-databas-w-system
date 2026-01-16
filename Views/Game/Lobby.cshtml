@@ -1,7 +1,6 @@
 ﻿@model List<GameLobby>
 
 <h2 class="text-center mt-4">Game Lobby</h2>
-
 @if (TempData["Message"] != null)
 {
     <div class="alert alert-success text-center">@TempData["Message"]</div>
@@ -40,7 +39,6 @@
                     {
                         <a class="btn btn-success" asp-action="Play" asp-route-id="@g.GameId">Enter</a>
                     }
-
                     <form method="post" asp-action="DeleteGame" asp-controller="Game">
                         <input type="hidden" name="gameId" value="@g.GameId" />
                         <button type="submit" class="btn btn-danger">Delete Game</button>
